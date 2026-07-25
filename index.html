@@ -375,6 +375,76 @@
   }
   .vibe .emoji{ font-size:17px; }
 
+  /* place */
+  .place-rec{
+    border:1px solid rgba(242,200,121,0.35);
+    background:rgba(242,200,121,0.08);
+    border-radius:16px;
+    padding:16px 16px 14px;
+    margin-bottom:14px;
+  }
+  .place-rec .rec-tag{
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .place-rec .rec-text{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:16px;
+    line-height:1.4;
+    color:var(--paper);
+  }
+  .place-choice{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .pchoice{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(251,246,239,0.16);
+    background:rgba(251,246,239,0.03);
+    cursor:pointer;
+    font-size:13.5px;
+    color:var(--paper);
+    transition:border-color 0.2s ease, background 0.2s ease;
+  }
+  .pchoice:hover{ border-color:rgba(242,200,121,0.4); }
+  .pchoice.selected{
+    border-color:var(--gold);
+    background:rgba(242,200,121,0.14);
+  }
+  .pchoice .emoji{ font-size:17px; }
+  .place-add label{
+    display:block;
+    font-size:12.5px;
+    color:var(--lavender);
+    margin-bottom:8px;
+  }
+  textarea#placeNote{
+    width:100%;
+    min-height:64px;
+    resize:vertical;
+    font-family:'Outfit', sans-serif;
+    background:rgba(251,246,239,0.06);
+    border:1px solid rgba(251,246,239,0.2);
+    border-radius:12px;
+    color:var(--paper);
+    padding:12px;
+    font-size:14px;
+    line-height:1.4;
+    color-scheme:dark;
+  }
+  textarea#placeNote:focus{ outline:2px solid var(--gold); outline-offset:2px; }
+
   .confirm-btn{
     margin-top:24px;
     width:100%;
@@ -391,6 +461,7 @@
     transition:transform 0.15s ease;
   }
   .confirm-btn:active{ transform:scale(0.98); }
+  .confirm-btn[disabled]{ opacity:0.7; cursor:progress; }
 
   .hint{
     text-align:center;
@@ -417,12 +488,13 @@
   .recap-row{
     display:flex;
     justify-content:space-between;
+    gap:16px;
     font-size:14px;
     padding:8px 0;
     border-bottom:1px solid rgba(251,246,239,0.08);
   }
   .recap-row:last-child{ border-bottom:none; }
-  .recap-row span:first-child{ color:var(--lavender); }
+  .recap-row span:first-child{ color:var(--lavender); flex:0 0 auto; }
   .recap-row span:last-child{ font-weight:600; text-align:right; }
 
   .edit-link{
@@ -482,13 +554,14 @@
   <section class="stage" id="stage2">
     <p class="eyebrow">she said yes</p>
     <h1 style="font-size:clamp(24px,5.4vw,32px)">Now, plan it with me</h1>
-    <p class="sub">Pick a day, a time, and the vibe — I'll take care of the rest.</p>
+    <p class="sub">Pick a day, a time, the vibe, and where — I'll take care of the rest.</p>
 
     <div class="card">
       <div class="step-dots" id="stepDots">
         <span class="dot" data-step="0"></span>
         <span class="dot" data-step="1"></span>
         <span class="dot" data-step="2"></span>
+        <span class="dot" data-step="3"></span>
       </div>
 
       <div class="substep" id="subDate">
@@ -518,6 +591,27 @@
         <div class="vibe-grid" id="vibeGrid"></div>
         <div class="step-row">
           <button class="step-back" id="vibeBack">Back</button>
+          <button class="step-next" id="vibeNext">Next</button>
+        </div>
+        <p class="hint" id="vibeHint">&nbsp;</p>
+      </div>
+
+      <div class="substep" id="subPlace">
+        <p class="section-label">Pick the place</p>
+        <div class="place-rec">
+          <div class="rec-tag">my recommendation</div>
+          <div class="rec-text">Somewhere we can walk and talk — get to know each other, no rush.</div>
+        </div>
+        <div class="place-choice" id="placeChoice">
+          <div class="pchoice" data-place="Walk &amp; talk (his pick)"><span class="emoji">🚶</span><span>Love it, let's walk</span></div>
+          <div class="pchoice" data-place="Her choice"><span class="emoji">💡</span><span>I have another idea</span></div>
+        </div>
+        <div class="place-add">
+          <label for="placeNote">Want to add something? (optional — a spot, an idea, anything)</label>
+          <textarea id="placeNote" placeholder="e.g. that park by the lake, or a café you love..."></textarea>
+        </div>
+        <div class="step-row">
+          <button class="step-back" id="placeBack">Back</button>
           <button class="confirm-btn" id="confirmBtn">Lock it in</button>
         </div>
         <p class="hint" id="hint">&nbsp;</p>
@@ -535,6 +629,8 @@
       <div class="recap-row"><span>Date</span><span id="recapDate">—</span></div>
       <div class="recap-row"><span>Time</span><span id="recapTime">—</span></div>
       <div class="recap-row"><span>Vibe</span><span id="recapVibe">—</span></div>
+      <div class="recap-row"><span>Place</span><span id="recapPlace">—</span></div>
+      <div class="recap-row"><span>Her note</span><span id="recapNote">—</span></div>
     </div>
 
     <button class="edit-link" id="editBtn">change something</button>
@@ -546,6 +642,14 @@
 
 <script>
 (function(){
+
+  /* ====================================================================
+     BACKEND ENDPOINT
+     Paste your Google Apps Script Web App URL between the quotes below.
+     (Setup steps are in SETUP.md next to this file.)
+     Leave it empty to test locally — answers still save to the recap.
+  ==================================================================== */
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbxhUylhvRSxCpO_m8dOP_1kocr6Nu6-Kgi7i2XuH_pCaijPNI91iHbz3TMeZggRZGYEqQ/exec";
 
   /* ---------- ambient background ---------- */
   const starsEl = document.getElementById('stars');
@@ -584,7 +688,7 @@
     stage.classList.add('active');
   }
 
-  /* ---------- No button dodges forever ---------- */
+  /* ---------- No button dodges forever (never overlaps Yes) ---------- */
   const field = document.getElementById('buttonField');
   const noBtn = document.getElementById('noBtn');
   const yesBtn = document.getElementById('yesBtn');
@@ -603,6 +707,14 @@
 
   let noPlaced = false;
   let isFlying = false;
+
+  // Do two rectangles (in field-local coords) overlap, allowing a gap?
+  function overlaps(a, b, gap){
+    return !(a.left > b.right + gap ||
+             a.right < b.left - gap ||
+             a.top > b.bottom + gap ||
+             a.bottom < b.top - gap);
+  }
 
   function spawnTrail(rect, x1, y1, x2, y2){
     const symbols = ['✦','·','∙'];
@@ -637,9 +749,22 @@
 
     const rect = field.getBoundingClientRect();
     const btnRect = noBtn.getBoundingClientRect();
+    const yRect = yesBtn.getBoundingClientRect();
     const padding = 6;
-    const maxLeft = rect.width - btnRect.width - padding;
-    const maxTop = rect.height - btnRect.height - padding;
+    const gap = 14; // min clear space kept around the Yes button
+
+    // Yes button, expressed in field-local coordinates
+    const yesLocal = {
+      left: yRect.left - rect.left,
+      top: yRect.top - rect.top,
+      right: yRect.right - rect.left,
+      bottom: yRect.bottom - rect.top
+    };
+
+    const bw = btnRect.width;
+    const bh = btnRect.height;
+    const maxLeft = Math.max(padding, rect.width - bw - padding);
+    const maxTop = Math.max(padding, rect.height - bh - padding);
 
     let startLeft, startTop;
     if(!noPlaced){
@@ -654,12 +779,30 @@
       startTop = parseFloat(noBtn.style.top) || 0;
     }
 
-    const newLeft = Math.max(padding, Math.random() * Math.max(maxLeft, padding));
-    const newTop = Math.max(padding, Math.random() * Math.max(maxTop, padding));
+    // Pick a landing spot that does NOT touch the Yes button.
+    let newLeft, newTop, ok = false;
+    for(let attempt = 0; attempt < 40 && !ok; attempt++){
+      newLeft = padding + Math.random() * (maxLeft - padding);
+      newTop  = padding + Math.random() * (maxTop  - padding);
+      const cand = { left:newLeft, top:newTop, right:newLeft + bw, bottom:newTop + bh };
+      if(!overlaps(cand, yesLocal, gap)) ok = true;
+    }
+    if(!ok){
+      // Fallback: park it hard in a corner away from Yes.
+      const yesMidX = (yesLocal.left + yesLocal.right) / 2;
+      newLeft = (yesMidX > rect.width / 2) ? padding : (maxLeft);
+      newTop  = padding;
+    }
 
-    // a gentle upward arc mid-flight, like it's genuinely floating rather than snapping
-    const midLeft = (startLeft + newLeft) / 2 + (Math.random() * 50 - 25);
-    const midTop = Math.max(padding, Math.min(startTop, newTop) - (45 + Math.random() * 35));
+    // Gentle upward arc mid-flight, kept above the Yes button so it never
+    // crosses it even in passing.
+    let midLeft = (startLeft + newLeft) / 2 + (Math.random() * 40 - 20);
+    let midTop  = Math.max(padding, Math.min(startTop, newTop) - (45 + Math.random() * 35));
+    const midCand = { left:midLeft, top:midTop, right:midLeft + bw, bottom:midTop + bh };
+    if(overlaps(midCand, yesLocal, gap)){
+      // lift the arc clear above Yes
+      midTop = Math.max(padding, yesLocal.top - bh - gap);
+    }
 
     const rot = (Math.random() * 26 - 13).toFixed(1);
 
@@ -703,7 +846,8 @@
   const substeps = [
     document.getElementById('subDate'),
     document.getElementById('subTime'),
-    document.getElementById('subVibe')
+    document.getElementById('subVibe'),
+    document.getElementById('subPlace')
   ];
   const dots = Array.from(document.querySelectorAll('.dot'));
   let currentStep = 0;
@@ -818,9 +962,6 @@
     showStep(2);
   });
 
-  const vibeBackBtn = document.getElementById('vibeBack');
-  vibeBackBtn.addEventListener('click', () => showStep(1));
-
   /* ---------- vibes ---------- */
   const vibes = [
     {emoji:"🌙", label:"Cozy night in"},
@@ -845,10 +986,40 @@
     vibeGrid.appendChild(el);
   });
 
-  /* ---------- confirm ---------- */
+  const vibeBackBtn = document.getElementById('vibeBack');
+  const vibeNextBtn = document.getElementById('vibeNext');
+  const vibeHint = document.getElementById('vibeHint');
+  vibeBackBtn.addEventListener('click', () => showStep(1));
+  vibeNextBtn.addEventListener('click', () => {
+    if(!selectedVibe){
+      vibeHint.textContent = "pick a vibe first 🥺";
+      vibeNextBtn.classList.add('shake');
+      setTimeout(() => vibeNextBtn.classList.remove('shake'), 400);
+      return;
+    }
+    vibeHint.textContent = "";
+    showStep(3);
+  });
+
+  /* ---------- place ---------- */
+  let selectedPlace = null;
+  const placeChoice = document.getElementById('placeChoice');
+  placeChoice.querySelectorAll('.pchoice').forEach(el => {
+    el.addEventListener('click', () => {
+      placeChoice.querySelectorAll('.pchoice').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedPlace = el.getAttribute('data-place');
+    });
+  });
+
+  const placeBackBtn = document.getElementById('placeBack');
+  placeBackBtn.addEventListener('click', () => showStep(2));
+
+  /* ---------- confirm + send ---------- */
   const confirmBtn = document.getElementById('confirmBtn');
   const hint = document.getElementById('hint');
   const timeInput = document.getElementById('timeInput');
+  const placeNote = document.getElementById('placeNote');
 
   function formatDate(d){
     const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -862,18 +1033,56 @@
     return hour12 + ':' + String(m).padStart(2,'0') + ' ' + period;
   }
 
-  confirmBtn.addEventListener('click', () => {
-    if(!selectedDate || !timeInput.value || !selectedVibe){
-      hint.textContent = "pick a date, a time, and a vibe first 🥺";
+  function sendResponse(payload){
+    // Fire-and-forget to the Apps Script endpoint. Also keep a local copy.
+    try {
+      localStorage.setItem('date_response', JSON.stringify(payload));
+    } catch(e){}
+
+    if(!ENDPOINT) return Promise.resolve();
+
+    return fetch(ENDPOINT, {
+      method: 'POST',
+      // text/plain avoids a CORS preflight; Apps Script reads e.postData.contents
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).catch(() => {}); // network errors shouldn't block the happy ending
+  }
+
+  confirmBtn.addEventListener('click', async () => {
+    if(!selectedDate || !timeInput.value || !selectedVibe || !selectedPlace){
+      hint.textContent = "pick a date, time, vibe, and place first 🥺";
       confirmBtn.classList.add('shake');
       setTimeout(() => confirmBtn.classList.remove('shake'), 400);
       return;
     }
     hint.textContent = "";
 
-    document.getElementById('recapDate').textContent = formatDate(selectedDate);
-    document.getElementById('recapTime').textContent = formatTime(timeInput.value);
-    document.getElementById('recapVibe').textContent = selectedVibe;
+    const note = placeNote.value.trim();
+    const payload = {
+      answer: "YES",
+      date: formatDate(selectedDate),
+      dateISO: selectedDate.toISOString().slice(0,10),
+      time: formatTime(timeInput.value),
+      time24: timeInput.value,
+      vibe: selectedVibe,
+      place: selectedPlace,
+      note: note,
+      submittedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    };
+
+    document.getElementById('recapDate').textContent = payload.date;
+    document.getElementById('recapTime').textContent = payload.time;
+    document.getElementById('recapVibe').textContent = payload.vibe;
+    document.getElementById('recapPlace').textContent = payload.place;
+    document.getElementById('recapNote').textContent = note || "—";
+
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "Sending...";
+    await sendResponse(payload);
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = "Lock it in";
 
     goTo(stage3);
     fireBurst();
