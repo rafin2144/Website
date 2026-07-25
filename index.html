@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    
     --ink-deep:#1B1633;
     --ink-mid:#2E2158;
     --gold:#F2C879;
@@ -168,13 +167,10 @@
     border:1px solid rgba(251,246,239,0.25);
     position:relative;
     z-index:2;
-    transition:left 0.38s cubic-bezier(.34,1.56,.64,1), top 0.38s cubic-bezier(.34,1.56,.64,1), transform 0.25s ease, opacity 0.3s ease;
   }
   .btn-no.roaming{
     position:absolute;
-  }
-  .btn-no.zoom{
-    transform:scale(0.85) rotate(var(--wig, 8deg));
+    will-change:left, top, transform;
   }
 
   .taunt{
@@ -204,6 +200,72 @@
     color:var(--gold);
     font-weight:600;
     margin:0 0 12px;
+  }
+
+  /* ---- one-question-at-a-time steps ---- */
+  .step-dots{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    margin-bottom:22px;
+  }
+  .dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:rgba(251,246,239,0.18);
+    transition:all 0.3s ease;
+  }
+  .dot.active{
+    width:22px;
+    border-radius:4px;
+    background:var(--gold);
+  }
+  .dot.done{ background:var(--rose); }
+
+  .substep{ display:none; }
+  .substep.active{
+    display:block;
+    animation:riseIn 0.45s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .step-row{
+    display:flex;
+    gap:10px;
+    margin-top:24px;
+  }
+  .step-back{
+    flex:0 0 auto;
+    background:transparent;
+    border:1px solid rgba(251,246,239,0.22);
+    color:var(--paper);
+    border-radius:14px;
+    padding:15px 20px;
+    cursor:pointer;
+    font-family:'Outfit', sans-serif;
+    font-weight:600;
+    font-size:14px;
+  }
+  .step-next{
+    width:100%;
+    margin-top:24px;
+    background:linear-gradient(135deg, var(--rose), var(--gold));
+    color:#241634;
+    font-family:'Outfit', sans-serif;
+    font-weight:700;
+    font-size:15.5px;
+    border:none;
+    border-radius:14px;
+    padding:15px;
+    cursor:pointer;
+    box-shadow:var(--shadow-glow);
+    transition:transform 0.15s ease;
+  }
+  .step-next:active{ transform:scale(0.98); }
+  .step-row .step-next,
+  .step-row .confirm-btn{
+    flex:1;
+    margin-top:0;
   }
 
   /* calendar */
@@ -423,26 +485,43 @@
     <p class="sub">Pick a day, a time, and the vibe — I'll take care of the rest.</p>
 
     <div class="card">
-      <p class="section-label">Pick a date</p>
-      <div class="cal-head">
-        <button class="cal-nav-btn" id="prevMonth" aria-label="Previous month" style="background:transparent;border:1px solid rgba(251,246,239,0.2);color:var(--paper);width:30px;height:30px;border-radius:50%;cursor:pointer;">‹</button>
-        <div class="cal-title" id="calTitle"></div>
-        <button class="cal-nav-btn" id="nextMonth" aria-label="Next month" style="background:transparent;border:1px solid rgba(251,246,239,0.2);color:var(--paper);width:30px;height:30px;border-radius:50%;cursor:pointer;">›</button>
+      <div class="step-dots" id="stepDots">
+        <span class="dot" data-step="0"></span>
+        <span class="dot" data-step="1"></span>
+        <span class="dot" data-step="2"></span>
       </div>
-      <div class="cal-grid" id="calGrid"></div>
 
-      <hr class="div">
+      <div class="substep" id="subDate">
+        <p class="section-label">Pick a date</p>
+        <div class="cal-head">
+          <button class="cal-nav-btn" id="prevMonth" aria-label="Previous month" style="background:transparent;border:1px solid rgba(251,246,239,0.2);color:var(--paper);width:30px;height:30px;border-radius:50%;cursor:pointer;">‹</button>
+          <div class="cal-title" id="calTitle"></div>
+          <button class="cal-nav-btn" id="nextMonth" aria-label="Next month" style="background:transparent;border:1px solid rgba(251,246,239,0.2);color:var(--paper);width:30px;height:30px;border-radius:50%;cursor:pointer;">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <button class="step-next" id="dateNext">Next</button>
+        <p class="hint" id="dateHint">&nbsp;</p>
+      </div>
 
-      <p class="section-label">Pick a time</p>
-      <input type="time" id="timeInput" value="19:00">
+      <div class="substep" id="subTime">
+        <p class="section-label">Pick a time</p>
+        <input type="time" id="timeInput" value="19:00">
+        <div class="step-row">
+          <button class="step-back" id="timeBack">Back</button>
+          <button class="step-next" id="timeNext">Next</button>
+        </div>
+        <p class="hint" id="timeHint">&nbsp;</p>
+      </div>
 
-      <hr class="div">
-
-      <p class="section-label">Pick the vibe</p>
-      <div class="vibe-grid" id="vibeGrid"></div>
-
-      <button class="confirm-btn" id="confirmBtn">Lock it in</button>
-      <p class="hint" id="hint">&nbsp;</p>
+      <div class="substep" id="subVibe">
+        <p class="section-label">Pick the vibe</p>
+        <div class="vibe-grid" id="vibeGrid"></div>
+        <div class="step-row">
+          <button class="step-back" id="vibeBack">Back</button>
+          <button class="confirm-btn" id="confirmBtn">Lock it in</button>
+        </div>
+        <p class="hint" id="hint">&nbsp;</p>
+      </div>
     </div>
   </section>
 
@@ -523,30 +602,87 @@
   ];
 
   let noPlaced = false;
+  let isFlying = false;
+
+  function spawnTrail(rect, x1, y1, x2, y2){
+    const symbols = ['✦','·','∙'];
+    const count = 4;
+    for(let i=0;i<count;i++){
+      const t = i / (count - 1);
+      const px = rect.left + x1 + (x2 - x1) * t + (Math.random() * 12 - 6);
+      const py = rect.top + y1 + (y2 - y1) * t - 26 * Math.sin(Math.PI * t) + (Math.random() * 10 - 5);
+      const dot = document.createElement('span');
+      dot.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      dot.style.position = 'fixed';
+      dot.style.left = px + 'px';
+      dot.style.top = py + 'px';
+      dot.style.color = i % 2 === 0 ? 'var(--gold)' : 'var(--rose)';
+      dot.style.fontSize = '11px';
+      dot.style.opacity = '0.85';
+      dot.style.pointerEvents = 'none';
+      dot.style.zIndex = '6';
+      dot.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
+      dot.style.transitionDelay = (t * 0.15) + 's';
+      document.body.appendChild(dot);
+      requestAnimationFrame(() => {
+        dot.style.opacity = '0';
+        dot.style.transform = 'translateY(-16px)';
+      });
+      setTimeout(() => dot.remove(), 750);
+    }
+  }
 
   function dodge(){
+    if(isFlying) return;
+
     const rect = field.getBoundingClientRect();
     const btnRect = noBtn.getBoundingClientRect();
     const padding = 6;
     const maxLeft = rect.width - btnRect.width - padding;
     const maxTop = rect.height - btnRect.height - padding;
 
+    let startLeft, startTop;
     if(!noPlaced){
+      startLeft = btnRect.left - rect.left;
+      startTop = btnRect.top - rect.top;
       noBtn.classList.add('roaming');
+      noBtn.style.left = startLeft + 'px';
+      noBtn.style.top = startTop + 'px';
       noPlaced = true;
+    } else {
+      startLeft = parseFloat(noBtn.style.left) || 0;
+      startTop = parseFloat(noBtn.style.top) || 0;
     }
 
     const newLeft = Math.max(padding, Math.random() * Math.max(maxLeft, padding));
     const newTop = Math.max(padding, Math.random() * Math.max(maxTop, padding));
 
-    noBtn.style.left = newLeft + 'px';
-    noBtn.style.top = newTop + 'px';
+    // a gentle upward arc mid-flight, like it's genuinely floating rather than snapping
+    const midLeft = (startLeft + newLeft) / 2 + (Math.random() * 50 - 25);
+    const midTop = Math.max(padding, Math.min(startTop, newTop) - (45 + Math.random() * 35));
 
-    const wiggle = (Math.random() * 16 - 8).toFixed(1) + 'deg';
-    noBtn.style.setProperty('--wig', wiggle);
-    noBtn.classList.add('zoom');
-    setTimeout(() => noBtn.classList.remove('zoom'), 250);
+    const rot = (Math.random() * 26 - 13).toFixed(1);
 
+    isFlying = true;
+
+    const anim = noBtn.animate([
+      { left: startLeft + 'px', top: startTop + 'px', transform: 'rotate(0deg) scale(1)', offset: 0 },
+      { left: midLeft + 'px', top: midTop + 'px', transform: `rotate(${rot}deg) scale(1.06)`, offset: 0.55 },
+      { left: newLeft + 'px', top: newTop + 'px', transform: 'rotate(0deg) scale(1)', offset: 1 }
+    ], {
+      duration: 700,
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fill: 'forwards'
+    });
+
+    anim.onfinish = () => {
+      noBtn.style.left = newLeft + 'px';
+      noBtn.style.top = newTop + 'px';
+      noBtn.style.transform = '';
+      isFlying = false;
+    };
+
+    spawnTrail(rect, startLeft, startTop, newLeft, newTop);
     taunt.textContent = taunts[Math.floor(Math.random() * taunts.length)];
   }
 
@@ -560,7 +696,26 @@
   yesBtn.addEventListener('click', () => {
     goTo(stage2);
     renderCalendar();
+    showStep(0);
   });
+
+  /* ---------- one question at a time ---------- */
+  const substeps = [
+    document.getElementById('subDate'),
+    document.getElementById('subTime'),
+    document.getElementById('subVibe')
+  ];
+  const dots = Array.from(document.querySelectorAll('.dot'));
+  let currentStep = 0;
+
+  function showStep(i){
+    currentStep = i;
+    substeps.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    dots.forEach((d, idx) => {
+      d.classList.toggle('active', idx === i);
+      d.classList.toggle('done', idx < i);
+    });
+  }
 
   /* ---------- calendar ---------- */
   const calTitle = document.getElementById('calTitle');
@@ -635,6 +790,37 @@
     renderCalendar();
   });
 
+  const dateNextBtn = document.getElementById('dateNext');
+  const dateHint = document.getElementById('dateHint');
+  dateNextBtn.addEventListener('click', () => {
+    if(!selectedDate){
+      dateHint.textContent = "pick a date first 🥺";
+      dateNextBtn.classList.add('shake');
+      setTimeout(() => dateNextBtn.classList.remove('shake'), 400);
+      return;
+    }
+    dateHint.textContent = "";
+    showStep(1);
+  });
+
+  const timeBackBtn = document.getElementById('timeBack');
+  const timeNextBtn = document.getElementById('timeNext');
+  const timeHint = document.getElementById('timeHint');
+  timeBackBtn.addEventListener('click', () => showStep(0));
+  timeNextBtn.addEventListener('click', () => {
+    if(!document.getElementById('timeInput').value){
+      timeHint.textContent = "pick a time first 🥺";
+      timeNextBtn.classList.add('shake');
+      setTimeout(() => timeNextBtn.classList.remove('shake'), 400);
+      return;
+    }
+    timeHint.textContent = "";
+    showStep(2);
+  });
+
+  const vibeBackBtn = document.getElementById('vibeBack');
+  vibeBackBtn.addEventListener('click', () => showStep(1));
+
   /* ---------- vibes ---------- */
   const vibes = [
     {emoji:"🌙", label:"Cozy night in"},
@@ -695,6 +881,7 @@
 
   document.getElementById('editBtn').addEventListener('click', () => {
     goTo(stage2);
+    showStep(0);
   });
 
   /* ---------- celebration burst ---------- */
